@@ -95,7 +95,7 @@ class BuildkiteApi:
     ]:  # Returns (status_code, response headers, json data)
         headers = self._auth_headers().update({"Content-Type": "application/json"})
         req = urllib.request.Request(
-            url=url, data=json.dumps(data), headers=headers, method="PUT"
+            url=url, data=json.dumps(data) if data else None, headers=headers, method="PUT"
         )
         with urllib.request.urlopen(req) as response:
             data = response.read()
