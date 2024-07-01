@@ -105,7 +105,7 @@ class BuildkiteApi:
         headers = {**self._auth_headers(), **{"Content-Type": "application/json"}}
         req = urllib.request.Request(
             url=url,
-            data=json.dumps(data) if data is not None else None,
+            data=json.dumps(data).encode('utf-8') if data is not None else None,
             headers=headers,
             method="PUT",
         )
