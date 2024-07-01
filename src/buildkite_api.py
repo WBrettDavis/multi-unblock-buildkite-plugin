@@ -93,7 +93,7 @@ class BuildkiteApi:
     ) -> t.Tuple[
         int, dict, t.Any
     ]:  # Returns (status_code, response headers, json data)
-        headers = self._auth_headers().update({"Content-Type": "application/json"})
+        headers = {**self._auth_headers(), **{"Content-Type": "application/json"}}
         req = urllib.request.Request(
             url=url, data=json.dumps(data) if data else None, headers=headers, method="PUT"
         )
