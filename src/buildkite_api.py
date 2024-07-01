@@ -37,11 +37,19 @@ class BuildkiteUser:
 
 
 class BuildkiteJob:
-    def __init__(self, id: str, step_key: str, unblockable: bool, state: str) -> None:
+    def __init__(
+        self,
+        id: str,
+        step_key: t.Optional[str],
+        unblockable: t.Optional[bool],
+        state: t.Optional[str],
+        unblock_url: t.Optional[str],
+    ) -> None:
         self.id = id
         self.step_key = step_key
         self.unblockable = unblockable
         self.state = state
+        self.unblock_url = unblock_url
 
     @staticmethod
     def from_json(json: dict) -> "BuildkiteJob":
@@ -50,6 +58,7 @@ class BuildkiteJob:
             step_key=json.get("step_key", None),
             unblockable=json.get("unblockable", None),
             state=json.get("state", None),
+            unblock_url=json.get("unblock_url", None),
         )
 
 
@@ -95,7 +104,10 @@ class BuildkiteApi:
     ]:  # Returns (status_code, response headers, json data)
         headers = {**self._auth_headers(), **{"Content-Type": "application/json"}}
         req = urllib.request.Request(
-            url=url, data=json.dumps(data) if data else None, headers=headers, method="PUT"
+            url=url,
+            data=json.dumps(data) if data else None,
+            headers=headers,
+            method="PUT",
         )
         with urllib.request.urlopen(req) as response:
             data = response.read()
@@ -115,10 +127,10 @@ class BuildkiteApi:
         return unblockable_jobs
 
     def unblock_job(
-        self, pipeline_slug: str, build_number: int, job_id: str
+        self, job: BuildkiteJob, fields: t.Optional[t.Dict[str, str]] = None
     ) -> None:
-        unblock_job_api = (
-            f"organizations/{self.org}/pipelines/{pipeline_slug}/builds/{build_number}/jobs/{job_id}/unblock"
-        )
-        url = f"{BUILDKITE_API_URL}/{unblock_job_api}"
-        status_code, res_headers, data = self._http_put(url)
+        if not job.unblock_url:
+            raise Exception("Job has no unblock_url set")
+        if not fields:
+            fields = {}
+        status_code, res_headers, data = self._http_put(job.unblock_url, data=fields)

@@ -31,5 +31,3 @@ class EnvironmentTest(TestCase):
 
         # act/assert
         self.assertRaises(EnvironmentValidationError, env.validate)
-
-

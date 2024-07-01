@@ -13,7 +13,9 @@ def test_unblock_happy_path() -> None:
     env_mock.build_number = 123
     agent_mock = Mock(spec=BuildkiteAgent)
     api_mock = Mock(spec=BuildkiteApi)
-    api_mock.get_unblockable_jobs_in_build.return_value = [BuildkiteJob(id="test", step_key="test", unblockable=True, state="unknown")]
+    api_mock.get_unblockable_jobs_in_build.return_value = [
+        BuildkiteJob(id="test", step_key="test", unblockable=True, state="unknown")
+    ]
     plugin = MultiUnblockPlugin(env_mock, api_mock, agent_mock)
 
     # act

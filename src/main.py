@@ -17,10 +17,12 @@ class MultiUnblockPlugin:
         self.agent = agent
 
     def main(self) -> None:
-        jobs = self.api.get_unblockable_jobs_in_build(self.env.pipeline_slug, self.env.build_number)
+        jobs = self.api.get_unblockable_jobs_in_build(
+            self.env.pipeline_slug, self.env.build_number
+        )
         print(f"Found {len(jobs)} unblockable jobs")
-        for j in jobs:
-            self.api.unblock_job(self.env.pipeline_slug, self.env.build_number, j.id)
+        for job in jobs:
+            self.api.unblock_job(job)
 
 
 if __name__ == "__main__":

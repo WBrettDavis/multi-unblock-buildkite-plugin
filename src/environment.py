@@ -47,11 +47,11 @@ class Environment:
     @property
     def org(self) -> str:
         return os.getenv("BUILDKITE_ORGANIZATION_SLUG")
-    
+
     @property
     def pipeline_slug(self) -> int:
         return os.getenv("BUILDKITE_PIPELINE_SLUG")
-    
+
     @property
     def build_number(self) -> int:
         return int(os.getenv("BUILDKITE_BUILD_NUMBER"))
@@ -70,7 +70,6 @@ class Environment:
     @property
     def unblock_step_pattern(self) -> str:
         return self._get_plugin_config_bool("unblock-step-pattern")
-
 
     def validate(self) -> None:
         if not self.api_token:
