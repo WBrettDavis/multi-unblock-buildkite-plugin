@@ -73,7 +73,7 @@ class Environment:
 
 
     def validate(self) -> None:
-        print(f"Self API TOKEN: {self.api_token}")
+        print(f"API_TOKEN: {self.api_token}")
         if not self.api_token:
             raise EnvironmentValidationError(
                 "Buildkite API token not set. See Plugin README for details."
