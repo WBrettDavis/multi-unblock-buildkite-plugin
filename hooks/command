@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+# The `pwd` is the directory where the repo is checked out configured in pipeline settings. This should 
+# always be `all-the-things`.
+export PLUGIN_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+pushd "${PLUGIN_DIRECTORY}"
+python3 -m src.main
+popd

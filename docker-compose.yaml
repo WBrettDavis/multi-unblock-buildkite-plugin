@@ -1,0 +1,26 @@
+services:
+  plugin-tests:
+    image: buildkite/plugin-tester
+    volumes:
+      - ".:/plugin:ro"
+  pytests37:
+    image: "python:3.7-slim"
+    entrypoint: "/bin/bash -c"
+    command: "'pip install -r requirements-dev.txt ; python -m pytest tests'"
+    working_dir: /workdir
+    volumes:
+      - ".:/workdir:ro"
+  pytests39:
+    image: "python:3.9-slim"
+    entrypoint: "/bin/bash -c"
+    command: "'pip install -r requirements-dev.txt ; python -m pytest tests'"
+    working_dir: /workdir
+    volumes:
+      - ".:/workdir:ro"
+  pytests311:
+    image: "python:3.11-slim"
+    entrypoint: "/bin/bash -c"
+    command: "'pip install -r requirements-dev.txt ; python -m pytest tests'"
+    working_dir: /workdir
+    volumes:
+      - ".:/workdir:ro"

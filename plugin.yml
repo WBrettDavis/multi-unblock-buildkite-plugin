@@ -1,0 +1,15 @@
+name: Multi Unblock
+description: Buildkite plugin for creating steps to unblock multiple other block steps
+author: https://github.com/WBrettDavis
+requirements: ["python3"]
+configuration:
+  properties:
+    unblock-step-pattern:
+      type: string
+      description: Regex pattern for to match step keys which should be unblocked by this step
+      default: false
+    api-token:
+      type: string
+      description: This should be the name of the environment variable containing a Buildkite API token for use by the plugin
+      default: BUILDKITE_API_TOKEN
+  additionalProperties: false
