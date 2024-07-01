@@ -50,11 +50,11 @@ class Environment:
     
     @property
     def pipeline_slug(self) -> int:
-        return int(os.getenv("BUILDKITE_BUILD_NUMBER"))
+        return int(os.getenv("BUILDKITE_PIPELINE_SLUG"))
     
     @property
     def build_number(self) -> int:
-        return os.getenv("BUILDKITE_PIPELINE_SLUG")
+        return os.getenv("BUILDKITE_BUILD_NUMBER")
 
     @property
     def api_token_name(self) -> str:
@@ -73,7 +73,6 @@ class Environment:
 
 
     def validate(self) -> None:
-        print(f"API_TOKEN: {self.api_token}")
         if not self.api_token:
             raise EnvironmentValidationError(
                 "Buildkite API token not set. See Plugin README for details."
