@@ -34,8 +34,8 @@ class BuildkiteAgent:
         self._buildkite_agent(["step", "update", "label", label])
 
     def get_self_step_label(self) -> str:
-        print("--- Getting self ßstep label")
-        self._buildkite_agent(["step", "get", '"label"'])
+        print("--- Getting self step label")
+        self._buildkite_agent(["step", "get", "label"])
 
     def get_step_state(self, step_key: str) -> str:
         print(f"--- Getting step state for step: {step_key}")
