@@ -1,10 +1,10 @@
 import typing as t
 from src.buildkite_agent import BuildkiteAgent
-from src.buildkite_api import BuildkiteApi
+from src.buildkite_api import BuildkiteApi, BuildkiteJob
 from src.environment import Environment
 from multiprocessing import Process, Queue
 import time
-import re
+import fnmatch
 
 APPROVAL_VALIDATION_FAILED_EXIT_CODE = 99
 FAILED_EMOJI = ":negative_squared_cross_mark:"
@@ -29,10 +29,9 @@ class MultiUnblockPlugin:
         poll_interval_seconds = 10
         while True:
             step_state = self.agent.get_step_state(step_key)
-            print(f"Evaluating step state {step_state} for step: {step_key}")
             if step_state != "unblocked":
                 print(
-                    f"Step is still blocked, checking again in {poll_interval_seconds} seconds"
+                    f"Override step is still blocked, checking again in {poll_interval_seconds} seconds"
                 )
                 time.sleep(float(poll_interval_seconds))
             else:
@@ -50,15 +49,20 @@ class MultiUnblockPlugin:
         unblockable_jobs = self.api.get_unblockable_jobs_in_build(
             self.env.pipeline_slug, self.env.build_number
         )
-        matched_jobs = []
-        for job in unblockable_jobs:
-            print(f"Evaluating job with step_key: {job.step_key}")
-            if block_step_pattern and re.match(block_step_pattern, job.step_key):
-                matched_jobs.append(job)
-            elif job.step_key in block_steps:
-                matched_jobs.append(job)
+        step_keys_to_unblock = set(block_steps)
+        if block_step_pattern:
+            pattern_matched_step_keys = set(
+                fnmatch.filter(
+                    block_step_pattern, [j.step_key for j in unblockable_jobs]
+                )
+            )
+            step_keys_to_unblock.update(pattern_matched_step_keys)
+
         unblock_processes: t.List[Process] = []
-        for job in matched_jobs:
+        jobs_to_unblock = [
+            j for j in unblockable_jobs if j.step_key in step_keys_to_unblock
+        ]
+        for job in jobs_to_unblock:
             unblock_process = Process(target=self.api.unblock_job, args=[job])
             unblock_processes.append(unblock_process)
 
