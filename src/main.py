@@ -51,6 +51,7 @@ class MultiUnblockPlugin:
         )
         matched_jobs = []
         for job in unblockable_jobs:
+            print(f"Evaluating job with step_key: {job.step_key}")
             if block_step_pattern and re.match(block_step_pattern, job.step_key):
                 matched_jobs.append(job)
             elif job.step_key in block_steps:
