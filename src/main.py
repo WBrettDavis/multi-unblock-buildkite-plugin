@@ -157,7 +157,7 @@ class MultiUnblockPlugin:
             process.terminate()
 
         if result != NO_JOBS_REMAINING_EVENT:
-            self.unblock_jobs(block_steps, block_step_pattern)
+            self.unblock_jobs(block_steps, block_step_pattern, override_step_key)
 
     def main(self) -> None:
         if self.env.timeout_seconds is None:
