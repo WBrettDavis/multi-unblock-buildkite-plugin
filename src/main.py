@@ -111,6 +111,7 @@ class MultiUnblockPlugin:
     def main(self) -> None:
         if self.env.timeout_seconds is None:
             # No timer aspect, so immediately unblock
+            print("Immediately unblocking")
             self.unblock_jobs(self.env.block_steps, self.env.block_step_pattern)
         else:
             self_step_label = self.agent.get_self_step_label()
@@ -119,12 +120,14 @@ class MultiUnblockPlugin:
             )
             if self.env.override_step_key is None:
                 # Timer, but no override - sleep and then unblock everything
+                print("Unblocking after timer expires")
                 self.timed_unblock_jobs(
                     self.env.timeout_seconds,
                     self.env.block_steps,
                     self.env.block_step_pattern,
                 )
             else:
+                print("Unblocking after timer expires (with override)")
                 self.timed_unblock_jobs_with_override(
                     self.env.timeout_seconds,
                     self.env.block_steps,
