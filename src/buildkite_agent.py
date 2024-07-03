@@ -22,11 +22,6 @@ class BuildkiteAgent:
             print(f"STDOUT: \n{completed_process.stdout}")
             print(f"STDERR: \n{completed_process.stderr}")
             raise Exception("The buildkite-agent command failed.")
-        else:
-            print(f"The buildkite-agent command succeeded.")
-            print(f"Return Code: {completed_process.returncode}")
-            print(f"STDOUT: \n{completed_process.stdout}")
-            print(f"STDERR: \n{completed_process.stderr}")
         return completed_process.stdout
 
     def set_metadata(self, key: str, value: str) -> None:
@@ -44,7 +39,7 @@ class BuildkiteAgent:
     def get_step_state(self, step_key: str) -> str:
         print(f"Getting step state for step: {step_key}")
         step_state = self._buildkite_agent(
-            ["step", "get", '"state"', "--step", f'"{step_key}"']
+            ["step", "get", "state", "--step", step_key]
         )
         return step_state
 
