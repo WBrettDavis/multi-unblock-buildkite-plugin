@@ -20,10 +20,12 @@ class Environment:
         property_value = os.getenv(property_env_var, default)
         return property_value
 
-    def _get_plugin_config_int(self, property_name: str, default: int = 0) -> int:
+    def _get_plugin_config_int(self, property_name: str, default: t.Optional[int] = None) -> int:
         property_env_var = self._get_config_property_env_var(property_name)
-        property_value = int(os.getenv(property_env_var, str(default)))
-        return property_value
+        property_raw_value = os.getenv(property_env_var, None)
+        if property_raw_value is None:
+            return default
+        return int(property_raw_value)
 
     def _get_plugin_config_bool(self, property_name: str) -> bool:
         property_env_var = self._get_config_property_env_var(property_name)
