@@ -4,10 +4,21 @@ author: https://github.com/WBrettDavis
 requirements: ["python3"]
 configuration:
   properties:
+    prompt:
+      type: string
+      description: If specified, a manually unblockable step will be generated that will unblock steps matching the unblock-step-pattern or specified in the unblock-steps array
     unblock-step-pattern:
       type: string
       description: Regex pattern for to match step keys which should be unblocked by this step
-      default: false
+      default: null
+    unblock-steps:
+      type: array
+      description: List of step keys for unblockable steps which should be unblocked by this step
+      default: []
+    timeout-seconds:
+      type: number
+      description: Number of seconds to wait before unblocking targeted block steps
+      default: null
     api-token:
       type: string
       description: This should be the name of the environment variable containing a Buildkite API token for use by the plugin

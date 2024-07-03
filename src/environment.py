@@ -13,9 +13,11 @@ class Environment:
         formatted_property_name = property_name.upper().replace("-", "_")
         return f"{PLUGIN_ENV_VAR_PREFIX}_{formatted_property_name}"
 
-    def _get_plugin_config_str(self, property_name: str) -> str:
+    def _get_plugin_config_str(
+        self, property_name: str, default: t.Optional[str] = None
+    ) -> t.Optional[str]:
         property_env_var = self._get_config_property_env_var(property_name)
-        property_value = os.getenv(property_env_var)
+        property_value = os.getenv(property_env_var, default)
         return property_value
 
     def _get_plugin_config_int(self, property_name: str, default: int = 0) -> int:
@@ -68,8 +70,20 @@ class Environment:
         return os.getenv(self.api_token_name)
 
     @property
-    def unblock_step_pattern(self) -> str:
-        return self._get_plugin_config_bool("unblock-step-pattern")
+    def unblock_step_pattern(self) -> t.Optional[str]:
+        return self._get_plugin_config_str("unblock-step-pattern")
+
+    @property
+    def unblock_steps(self) -> t.List[str]:
+        return self._get_plugin_config_list("unblock-steps")
+
+    @property
+    def override_step_key(self) -> t.Optional[str]:
+        return self._get_plugin_config_str("override-step-key")
+
+    @property
+    def timeout_seconds(self) -> t.Optional[int]:
+        return self._get_plugin_config_int("timeout-seconds")
 
     def validate(self) -> None:
         if not self.api_token:
