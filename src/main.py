@@ -109,6 +109,12 @@ class MultiUnblockPlugin:
         self.unblock_jobs(block_steps, block_step_pattern)
 
     def main(self) -> None:
+        print(f"self.env.block_steps {self.env.block_steps}")
+        print(f"self.env.block_step_pattern {self.env.block_step_pattern}")
+        print(f"self.env.timeout_seconds {self.env.timeout_seconds}")
+        print(f"self.env.override_step_key {self.env.override_step_key}")
+        print(f"self.env.api_token {self.env.api_token}")
+        
         if self.env.timeout_seconds is None:
             # No timer aspect, so immediately unblock
             print("Immediately unblocking")

@@ -1,7 +1,7 @@
 import os
 import typing as t
 
-PLUGIN_ENV_VAR_PREFIX = "BUILDKITE_PLUGIN_MULTI_APPROVAL"
+PLUGIN_ENV_VAR_PREFIX = "BUILDKITE_PLUGIN_MULTI_UNBLOCK"
 
 
 class EnvironmentValidationError(Exception):
