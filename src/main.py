@@ -29,6 +29,7 @@ class MultiUnblockPlugin:
         poll_interval_seconds = 10
         while True:
             step_state = self.agent.get_step_state(step_key)
+            print(f"Override step state: {step_state}")
             if step_state != "unblocked":
                 print(
                     f"Override step is still blocked, checking again in {poll_interval_seconds} seconds"
