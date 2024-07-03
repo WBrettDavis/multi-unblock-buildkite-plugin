@@ -17,7 +17,7 @@ configuration:
       default: []
     timeout-seconds:
       type: number
-      description: Number of seconds to wait before unblocking targeted block steps
+      description: Number of seconds to wait before unblocking targeted block steps, or -1 to monitor until build completion
       default: null
     api-token:
       type: string

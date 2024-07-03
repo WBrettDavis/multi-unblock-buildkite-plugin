@@ -13,6 +13,10 @@ APPROVAL_VALIDATION_FAILED_EXIT_CODE = 99
 FAILED_EMOJI = ":negative_squared_cross_mark:"
 SUCCESS_EMOJI = ":white_check_mark:"
 
+TIMER_EXPIRED_EVENT = "timer_expired"
+OVERRIDE_EVENT = "override_step_unblocked"
+NO_JOBS_REMAINING_EVENT = "no_unblockable_jobs_remaning"
+
 
 def sleep(seconds: int) -> None:
     time.sleep(float(seconds))
@@ -34,7 +38,7 @@ class MultiUnblockPlugin:
             step_state = self.agent.get_step_state(step_key)
             print(f"Override step state: {step_state}")
             if step_state in ["unblocked", "finished"]:
-                result_queue.put("override_step_unblocked")
+                result_queue.put(OVERRIDE_EVENT)
                 break
             print(
                 f"Override step is still blocked, checking again in {poll_interval_seconds} seconds"
@@ -42,8 +46,24 @@ class MultiUnblockPlugin:
             time.sleep(float(poll_interval_seconds))
 
     def _sleep_thread(self, seconds: int, result_queue: Queue) -> None:
-        time.sleep(seconds)
-        result_queue.put("timer_expired")
+        sleep(seconds)
+        result_queue.put(TIMER_EXPIRED_EVENT)
+
+    def _monitor_thread(self, result_queue: Queue) -> None:
+        poll_interval_seconds = 10
+        while True:
+            print("Checking for unblockable jobs")
+            unblockable_jobs = self.api.get_unblockable_jobs_in_build(
+                self.env.pipeline_slug, self.env.build_number
+            )
+            if not unblockable_jobs:
+                print("No remaining unblockable jobs. Exiting...")
+                result_queue.put(NO_JOBS_REMAINING_EVENT)
+                break
+            print(
+                f"Found {len(unblockable_jobs)} unblockable jobs: {', '.join([j.step_key for j in unblockable_jobs])}"
+            )
+            time.sleep(float(poll_interval_seconds))
 
     def unblock_jobs(
         self,
@@ -85,11 +105,11 @@ class MultiUnblockPlugin:
 
     def timed_unblock_jobs(
         self,
-        seconds: float,
+        timeout_seconds: int,
         block_steps: t.List[str],
         block_step_pattern: t.Optional[str],
     ) -> None:
-        sleep(seconds)
+        sleep(timeout_seconds)
         self.unblock_jobs(block_steps, block_step_pattern)
 
     def timed_unblock_jobs_with_override(
@@ -102,18 +122,28 @@ class MultiUnblockPlugin:
         processes: t.List[Process] = []
         result_queue = Queue()
 
-        poll_process = Process(
+        poll_override_state_process = Process(
             target=self._poll_override_step_state_thread,
             args=[override_step_key, result_queue],
         )
-        poll_process.start()
+        poll_override_state_process.start()
+        processes.append(poll_override_state_process)
 
-        timeout_process = Process(
-            target=self._sleep_thread, args=[timeout_seconds, result_queue]
-        )
-        timeout_process.start()
-
-        processes.extend([poll_process, timeout_process])
+        if timeout_seconds == -1:
+            print("Starting build monitor")
+            monitor_process = Process(
+                target=self._monitor_thread,
+                args=[result_queue],
+            )
+            monitor_process.start()
+            processes.append(monitor_process)
+        else:
+            print("Starting timeout clock")
+            timeout_process = Process(
+                target=self._sleep_thread, args=[timeout_seconds, result_queue]
+            )
+            timeout_process.start()
+            processes.append(timeout_process)
 
         result = result_queue.get()
 
@@ -121,7 +151,9 @@ class MultiUnblockPlugin:
 
         for process in processes:
             process.terminate()
-        self.unblock_jobs(block_steps, block_step_pattern)
+
+        if result != NO_JOBS_REMAINING_EVENT:
+            self.unblock_jobs(block_steps, block_step_pattern)
 
     def main(self) -> None:
         if self.env.timeout_seconds is None:
