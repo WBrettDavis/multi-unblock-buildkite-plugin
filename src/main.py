@@ -91,6 +91,8 @@ class MultiUnblockPlugin:
         jobs_to_unblock = [
             j for j in unblockable_jobs if j.step_key in step_keys_to_unblock
         ]
+        job_keys_to_unblock = [j.step_key for j in jobs_to_unblock]
+        print(f"Unblocking the following jobs: {', '.join(job_keys_to_unblock)}")
         for job in jobs_to_unblock:
             unblock_process = Process(target=self.api.unblock_job, args=[job])
             unblock_processes.append(unblock_process)
