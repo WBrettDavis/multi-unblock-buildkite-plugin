@@ -141,7 +141,7 @@ class MultiUnblockPlugin:
             print("Starting build monitor")
             monitor_process = Process(
                 target=self._monitor_thread,
-                args=[result_queue],
+                args=[override_step_key, result_queue],
             )
             monitor_process.start()
             processes.append(monitor_process)
