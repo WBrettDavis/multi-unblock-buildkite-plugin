@@ -60,6 +60,9 @@ class BuildkiteJob:
             state=json.get("state", None),
             unblock_url=json.get("unblock_url", None),
         )
+    
+    def __repr__(self) -> str:
+        return f"step_key: {self.step_key}, unblockable: {self.unblockable} state: {self.state} unblock_url: {self.unblock_url}"
 
 
 class BuildkiteBuild:
@@ -129,8 +132,15 @@ class BuildkiteApi:
     def unblock_job(
         self, job: BuildkiteJob, fields: t.Optional[t.Dict[str, str]] = None
     ) -> None:
+        print(f"Unblock Job: {job}")
         if not job.unblock_url:
             raise Exception("Job has no unblock_url set")
         if not fields:
             fields = {}
         status_code, res_headers, data = self._http_put(job.unblock_url, data=fields)
+        if status_code not in [200, 201]:
+            print("Failed to unblock job")
+            print("Response Headers:")
+            print(str(res_headers))
+            print("Response Body: ")
+            print(str(data))

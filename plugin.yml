@@ -4,7 +4,7 @@ author: https://github.com/WBrettDavis
 requirements: ["python3"]
 configuration:
   properties:
-    prompt:
+    override-step-key:
       type: string
       description: If specified, a manually unblockable step will be generated that will unblock steps matching the unblock-step-pattern or specified in the unblock-steps array
     unblock-step-pattern:
