@@ -1,10 +1,13 @@
-import typing as t
-from src.buildkite_agent import BuildkiteAgent
-from src.buildkite_api import BuildkiteApi, BuildkiteJob
-from src.environment import Environment
-from multiprocessing import Process, Queue
 import time
 import fnmatch
+from multiprocessing import Process, Queue
+
+import typing as t
+
+from src.buildkite_agent import BuildkiteAgent
+from src.buildkite_api import BuildkiteApi
+from src.environment import Environment
+
 
 APPROVAL_VALIDATION_FAILED_EXIT_CODE = 99
 FAILED_EMOJI = ":negative_squared_cross_mark:"
@@ -46,11 +49,16 @@ class MultiUnblockPlugin:
         self,
         block_steps: t.List[str],
         block_step_pattern: t.Optional[str],
+        override_step_key: t.Optional[str] = None,
     ) -> None:
         unblockable_jobs = self.api.get_unblockable_jobs_in_build(
             self.env.pipeline_slug, self.env.build_number
         )
         step_keys_to_unblock = set(block_steps)
+
+        if override_step_key is not None:
+            step_keys_to_unblock.add(override_step_key)
+
         if block_step_pattern:
             pattern_matched_step_keys = set(
                 fnmatch.filter(
@@ -87,9 +95,9 @@ class MultiUnblockPlugin:
     def timed_unblock_jobs_with_override(
         self,
         timeout_seconds: int,
+        override_step_key: str,
         block_steps: t.List[str],
         block_step_pattern: t.Optional[str],
-        override_step_key: t.Optional[str],
     ) -> None:
         processes: t.List[Process] = []
         result_queue = Queue()
@@ -137,9 +145,9 @@ class MultiUnblockPlugin:
                 print("Unblocking after timer expires (with override)")
                 self.timed_unblock_jobs_with_override(
                     self.env.timeout_seconds,
+                    self.env.override_step_key,
                     self.env.block_steps,
                     self.env.block_step_pattern,
-                    self.env.override_step_key,
                 )
 
         jobs = self.api.get_unblockable_jobs_in_build(
