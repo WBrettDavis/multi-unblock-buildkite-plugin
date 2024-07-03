@@ -23,17 +23,23 @@ class MultiUnblockPlugin:
         self.api = api
         self.agent = agent
 
-    def _poll_step_state_thread(self, step_key: str, result_queue: Queue) -> None:
+    def _poll_override_step_state_thread(
+        self, step_key: str, result_queue: Queue
+    ) -> None:
+        poll_interval_seconds = 10
         while True:
             step_state = self.agent.get_step_state(step_key)
             if step_state == "blocked":
-                time.sleep(10)
+                print(
+                    f"Step is still blocked, checking again in {poll_interval_seconds} seconds"
+                )
+                time.sleep(float(poll_interval_seconds))
             else:
-                result_queue.put(True)
+                result_queue.put("override_step_unblocked")
 
     def _sleep_thread(self, seconds: int, result_queue: Queue) -> None:
         time.sleep(seconds)
-        result_queue.put(False)
+        result_queue.put("timer_expired")
 
     def unblock_jobs(
         self,
@@ -82,7 +88,8 @@ class MultiUnblockPlugin:
         result_queue = Queue()
 
         poll_process = Process(
-            target=self._poll_step_state_thread, args=[override_step_key, result_queue]
+            target=self._poll_override_step_state_thread,
+            args=[override_step_key, result_queue],
         )
         poll_process.start()
 
@@ -95,6 +102,8 @@ class MultiUnblockPlugin:
 
         result = result_queue.get()
 
+        print(f"Unblocking. Reason: {result}")
+
         for process in processes:
             process.terminate()
         self.unblock_jobs(block_steps, block_step_pattern)
@@ -104,6 +113,10 @@ class MultiUnblockPlugin:
             # No timer aspect, so immediately unblock
             self.unblock_jobs(self.env.block_steps, self.env.block_step_pattern)
         else:
+            self_step_label = self.agent.get_self_step_label()
+            self.agent.update_self_step_label(
+                f"{self_step_label} (Unblocks after {self.env.timeout_seconds} seconds)"
+            )
             if self.env.override_step_key is None:
                 # Timer, but no override - sleep and then unblock everything
                 self.timed_unblock_jobs(
