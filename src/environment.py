@@ -22,7 +22,9 @@ class Environment:
 
     def _get_plugin_config_int(self, property_name: str, default: t.Optional[int] = None) -> int:
         property_env_var = self._get_config_property_env_var(property_name)
+        print(f"Getting int value for property: {property_name} env_var: {property_env_var}")
         property_raw_value = os.getenv(property_env_var, None)
+        print(f"Raw Value: {property_raw_value}")
         if property_raw_value is None:
             return default
         return int(property_raw_value)
