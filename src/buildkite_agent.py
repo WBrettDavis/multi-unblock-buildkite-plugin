@@ -23,6 +23,12 @@ class BuildkiteAgent:
             print(f"STDERR: \n{completed_process.stderr}")
             print("^^^ +++")
             raise Exception("The buildkite-agent command failed.")
+        else:
+            print(f"The buildkite-agent command succeeded.")
+            print(f"Return Code: {completed_process.returncode}")
+            print(f"STDOUT: \n{completed_process.stdout}")
+            print(f"STDERR: \n{completed_process.stderr}")
+            print("^^^ +++")
         return completed_process.stdout
 
     def set_metadata(self, key: str, value: str) -> None:
