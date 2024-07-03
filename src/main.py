@@ -1,4 +1,3 @@
-import os
 import typing as t
 from src.buildkite_agent import BuildkiteAgent
 from src.buildkite_api import BuildkiteApi
@@ -31,7 +30,7 @@ class MultiUnblockPlugin:
         while True:
             step_state = self.agent.get_step_state(step_key)
             print(f"Evaluating step state {step_state} for step: {step_key}")
-            if step_state == "blocked":
+            if step_state != "unblocked":
                 print(
                     f"Step is still blocked, checking again in {poll_interval_seconds} seconds"
                 )
@@ -147,10 +146,6 @@ class MultiUnblockPlugin:
 
 
 if __name__ == "__main__":
-    print("PLUGIN ENVIRONMENT")
-    for name, value in os.environ.items():
-        print("{0}: {1}".format(name, value))
-    
     env = Environment()
     env.validate()
     api = BuildkiteApi(env.api_token, env.org)

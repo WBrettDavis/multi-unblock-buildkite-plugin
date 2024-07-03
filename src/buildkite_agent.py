@@ -25,7 +25,7 @@ class BuildkiteAgent:
         return completed_process.stdout
 
     def set_metadata(self, key: str, value: str) -> None:
-        print("Setting meta-data")
+        print(f"Setting meta-data {key}:{value}")
         self._buildkite_agent(["meta-data", "set", key, value])
 
     def update_self_step_label(self, label: str) -> None:
@@ -38,9 +38,7 @@ class BuildkiteAgent:
 
     def get_step_state(self, step_key: str) -> str:
         print(f"Getting step state for step: {step_key}")
-        step_state = self._buildkite_agent(
-            ["step", "get", "state", "--step", step_key]
-        )
+        step_state = self._buildkite_agent(["step", "get", "state", "--step", step_key])
         return step_state
 
     def pipeline_upload(self, pipeline_dict: dict) -> None:

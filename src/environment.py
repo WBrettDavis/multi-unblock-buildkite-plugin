@@ -20,10 +20,11 @@ class Environment:
         property_value = os.getenv(property_env_var, default)
         return property_value
 
-    def _get_plugin_config_int(self, property_name: str, default: t.Optional[int] = None) -> int:
+    def _get_plugin_config_int(
+        self, property_name: str, default: t.Optional[int] = None
+    ) -> int:
         property_env_var = self._get_config_property_env_var(property_name)
         property_raw_value = os.getenv(property_env_var, None)
-        print(f"{property_name}({property_env_var}) == {property_raw_value}")
         if property_raw_value is None:
             return default
         return int(property_raw_value)
