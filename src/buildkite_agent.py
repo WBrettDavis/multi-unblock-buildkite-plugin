@@ -1,7 +1,4 @@
-import os
 import subprocess
-import tempfile
-import json
 import typing as t
 
 
@@ -24,10 +21,6 @@ class BuildkiteAgent:
             raise Exception("The buildkite-agent command failed.")
         return completed_process.stdout
 
-    def set_metadata(self, key: str, value: str) -> None:
-        print(f"Setting meta-data {key}:{value}")
-        self._buildkite_agent(["meta-data", "set", key, value])
-
     def update_self_step_label(self, label: str) -> None:
         print(f"Updating self step label to: {label}")
         self._buildkite_agent(["step", "update", "label", label])
@@ -40,13 +33,3 @@ class BuildkiteAgent:
         print(f"Getting step state for step: {step_key}")
         step_state = self._buildkite_agent(["step", "get", "state", "--step", step_key])
         return step_state
-
-    def pipeline_upload(self, pipeline_dict: dict) -> None:
-        print("Uploading pipeline")
-        pipeline_filename = None
-        with tempfile.TemporaryDirectory() as td:
-            pipeline_filename = os.path.join(td, "pipeline.yaml")
-            with open(pipeline_filename, "w") as pipeline_file:
-                json_pipeline = json.dumps(pipeline_dict)
-                pipeline_file.write(json_pipeline)
-            self._buildkite_agent(["pipeline", "upload", pipeline_filename])
