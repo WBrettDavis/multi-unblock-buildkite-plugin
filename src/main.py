@@ -53,7 +53,7 @@ class MultiUnblockPlugin:
         if block_step_pattern:
             pattern_matched_step_keys = set(
                 fnmatch.filter(
-                    block_step_pattern, [j.step_key for j in unblockable_jobs]
+                    [j.step_key for j in unblockable_jobs], block_step_pattern
                 )
             )
             step_keys_to_unblock.update(pattern_matched_step_keys)
