@@ -49,19 +49,23 @@ class MultiUnblockPlugin:
         sleep(seconds)
         result_queue.put(TIMER_EXPIRED_EVENT)
 
-    def _monitor_thread(self, result_queue: Queue) -> None:
+    def _monitor_thread(self, override_step_key: str, result_queue: Queue) -> None:
         poll_interval_seconds = 10
         while True:
             print("Checking for unblockable jobs")
             unblockable_jobs = self.api.get_unblockable_jobs_in_build(
                 self.env.pipeline_slug, self.env.build_number
             )
-            if not unblockable_jobs:
+            jobs_minus_override = [
+                j for j in unblockable_jobs if j.step_key != override_step_key
+            ]
+
+            if not jobs_minus_override:
                 print("No remaining unblockable jobs. Exiting...")
                 result_queue.put(NO_JOBS_REMAINING_EVENT)
                 break
             print(
-                f"Found {len(unblockable_jobs)} unblockable jobs: {', '.join([j.step_key for j in unblockable_jobs])}"
+                f"Found {len(jobs_minus_override)} unblockable jobs: {', '.join([j.step_key for j in jobs_minus_override])}"
             )
             time.sleep(float(poll_interval_seconds))
 
@@ -155,9 +159,7 @@ class MultiUnblockPlugin:
 
         for process in processes:
             process.terminate()
-
-        if result != NO_JOBS_REMAINING_EVENT:
-            self.unblock_jobs(block_steps, block_step_pattern, override_step_key)
+        self.unblock_jobs(block_steps, block_step_pattern, override_step_key)
 
     def main(self) -> None:
         if self.env.timeout_seconds is None:
