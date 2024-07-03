@@ -29,7 +29,7 @@ class MultiUnblockPlugin:
         poll_interval_seconds = 10
         while True:
             step_state = self.agent.get_step_state(step_key)
-            print("Evaluating step state {step_state} for step: {step_key}")
+            print(f"Evaluating step state {step_state} for step: {step_key}")
             if step_state == "blocked":
                 print(
                     f"Step is still blocked, checking again in {poll_interval_seconds} seconds"
