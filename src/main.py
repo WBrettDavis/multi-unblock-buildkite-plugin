@@ -166,9 +166,12 @@ class MultiUnblockPlugin:
             self.unblock_jobs(self.env.block_steps, self.env.block_step_pattern)
         else:
             self_step_label = self.agent.get_self_step_label()
-            self.agent.update_self_step_label(
-                f"{self_step_label} (Unblocks after {self.env.timeout_seconds} seconds)"
-            )
+            if self.env.timeout_seconds == -1:
+                self_step_label = f"{self_step_label} (Monitoring Build)"
+            else:
+                self_step_label = f"{self_step_label} (Unblocks after {self.env.timeout_seconds} seconds)"
+            self.agent.update_self_step_label(self_step_label)
+
             if self.env.override_step_key is None:
                 # Timer, but no override - sleep and then unblock everything
                 print("Unblocking after timer expires")
@@ -185,13 +188,6 @@ class MultiUnblockPlugin:
                     self.env.block_steps,
                     self.env.block_step_pattern,
                 )
-
-        jobs = self.api.get_unblockable_jobs_in_build(
-            self.env.pipeline_slug, self.env.build_number
-        )
-        print(f"Found {len(jobs)} unblockable jobs")
-        for job in jobs:
-            self.api.unblock_job(job)
 
 
 if __name__ == "__main__":
