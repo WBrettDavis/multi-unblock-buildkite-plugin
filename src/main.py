@@ -85,6 +85,8 @@ class MultiUnblockPlugin:
                     [j.step_key for j in unblockable_jobs], block_step_pattern
                 )
             )
+            print(f"Step Keys Matching Pattern: {block_step_pattern}")
+            print(f"Key: {' '.join(pattern_matched_step_keys)}")
             step_keys_to_unblock.update(pattern_matched_step_keys)
 
         unblock_processes: t.List[Process] = []
