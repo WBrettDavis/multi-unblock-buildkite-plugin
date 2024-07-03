@@ -1,5 +1,6 @@
 import urllib.parse
 import urllib.request
+import urllib.error
 import json
 import typing as t
 
@@ -112,10 +113,13 @@ class BuildkiteApi:
             headers=headers,
             method="PUT",
         )
-        with urllib.request.urlopen(req) as response:
-            data = response.read()
-            response_object = json.loads(data.decode("utf-8"))
-            return (response.status, response.headers, response_object)
+        try:
+            with urllib.request.urlopen(req) as response:
+                data = response.read()
+                response_object = json.loads(data.decode("utf-8"))
+                return (response.status, response.headers, response_object)
+        except urllib.error.HTTPError as e:
+            return (e.code, e.headers, e.read())
 
     def get_unblockable_jobs_in_build(
         self, pipeline_slug: str, build_number: int
