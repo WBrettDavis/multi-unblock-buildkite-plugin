@@ -21,37 +21,35 @@ class BuildkiteAgent:
             print(f"Return Code: {completed_process.returncode}")
             print(f"STDOUT: \n{completed_process.stdout}")
             print(f"STDERR: \n{completed_process.stderr}")
-            print("^^^ +++")
             raise Exception("The buildkite-agent command failed.")
         else:
             print(f"The buildkite-agent command succeeded.")
             print(f"Return Code: {completed_process.returncode}")
             print(f"STDOUT: \n{completed_process.stdout}")
             print(f"STDERR: \n{completed_process.stderr}")
-            print("^^^ +++")
         return completed_process.stdout
 
     def set_metadata(self, key: str, value: str) -> None:
-        print("--- Setting meta-data")
+        print("Setting meta-data")
         self._buildkite_agent(["meta-data", "set", key, value])
 
     def update_self_step_label(self, label: str) -> None:
-        print(f"--- Updating self step label to: {label}")
+        print(f"Updating self step label to: {label}")
         self._buildkite_agent(["step", "update", "label", label])
 
     def get_self_step_label(self) -> str:
-        print("--- Getting self step label")
-        self._buildkite_agent(["step", "get", "label"])
+        print("Getting self step label")
+        return self._buildkite_agent(["step", "get", "label"])
 
     def get_step_state(self, step_key: str) -> str:
-        print(f"--- Getting step state for step: {step_key}")
+        print(f"Getting step state for step: {step_key}")
         step_state = self._buildkite_agent(
             ["step", "get", '"state"', "--step", f'"{step_key}"']
         )
         return step_state
 
     def pipeline_upload(self, pipeline_dict: dict) -> None:
-        print("--- Uploading pipeline")
+        print("Uploading pipeline")
         pipeline_filename = None
         with tempfile.TemporaryDirectory() as td:
             pipeline_filename = os.path.join(td, "pipeline.yaml")
