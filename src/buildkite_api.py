@@ -137,6 +137,7 @@ class BuildkiteApi:
             raise Exception("Job has no unblock_url set")
         if not fields:
             fields = {}
+        print(f"Unblock fields: {str(fields)}")
         status_code, res_headers, data = self._http_put(job.unblock_url, data=fields)
         if status_code not in [200, 201]:
             print("Failed to unblock job")
