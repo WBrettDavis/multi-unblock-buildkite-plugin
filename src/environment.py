@@ -70,12 +70,12 @@ class Environment:
         return os.getenv(self.api_token_name)
 
     @property
-    def unblock_step_pattern(self) -> t.Optional[str]:
-        return self._get_plugin_config_str("unblock-step-pattern")
+    def block_step_pattern(self) -> t.Optional[str]:
+        return self._get_plugin_config_str("block-step-pattern")
 
     @property
-    def unblock_steps(self) -> t.List[str]:
-        return self._get_plugin_config_list("unblock-steps")
+    def block_steps(self) -> t.List[str]:
+        return self._get_plugin_config_list("block-steps")
 
     @property
     def override_step_key(self) -> t.Optional[str]:

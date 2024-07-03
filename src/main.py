@@ -37,17 +37,17 @@ class MultiUnblockPlugin:
 
     def unblock_jobs(
         self,
-        unblock_steps: t.List[str],
-        unblock_step_pattern: t.Optional[str],
+        block_steps: t.List[str],
+        block_step_pattern: t.Optional[str],
     ) -> None:
         unblockable_jobs = self.api.get_unblockable_jobs_in_build(
             self.env.pipeline_slug, self.env.build_number
         )
         matched_jobs = []
         for job in unblockable_jobs:
-            if unblock_step_pattern and re.match(unblock_step_pattern, job.step_key):
+            if block_step_pattern and re.match(block_step_pattern, job.step_key):
                 matched_jobs.append(job)
-            elif job.step_key in unblock_steps:
+            elif job.step_key in block_steps:
                 matched_jobs.append(job)
         unblock_processes: t.List[Process] = []
         for job in matched_jobs:
@@ -65,17 +65,17 @@ class MultiUnblockPlugin:
     def timed_unblock_jobs(
         self,
         seconds: float,
-        unblock_steps: t.List[str],
-        step_key_pattern_to_unblock: t.Optional[str],
+        block_steps: t.List[str],
+        block_step_pattern: t.Optional[str],
     ) -> None:
         sleep(seconds)
-        self.unblock_jobs(unblock_steps, step_key_pattern_to_unblock)
+        self.unblock_jobs(block_steps, block_step_pattern)
 
     def timed_unblock_jobs_with_override(
         self,
         timeout_seconds: int,
-        step_keys_to_unblock: t.List[str],
-        unblock_step_pattern: t.Optional[str],
+        block_steps: t.List[str],
+        block_step_pattern: t.Optional[str],
         override_step_key: t.Optional[str],
     ) -> None:
         processes: t.List[Process] = []
@@ -97,25 +97,25 @@ class MultiUnblockPlugin:
 
         for process in processes:
             process.terminate()
-        self.unblock_jobs(step_keys_to_unblock, unblock_step_pattern)
+        self.unblock_jobs(block_steps, block_step_pattern)
 
     def main(self) -> None:
         if self.env.timeout_seconds is None:
             # No timer aspect, so immediately unblock
-            self.unblock_jobs(self.env.unblock_steps, self.env.unblock_step_pattern)
+            self.unblock_jobs(self.env.block_steps, self.env.block_step_pattern)
         else:
             if self.env.override_step_key is None:
                 # Timer, but no override - sleep and then unblock everything
                 self.timed_unblock_jobs(
                     self.env.timeout_seconds,
-                    self.env.unblock_steps,
-                    self.env.unblock_step_pattern,
+                    self.env.block_steps,
+                    self.env.block_step_pattern,
                 )
             else:
                 self.timed_unblock_jobs_with_override(
                     self.env.timeout_seconds,
-                    self.env.unblock_steps,
-                    self.env.unblock_step_pattern,
+                    self.env.block_steps,
+                    self.env.block_step_pattern,
                     self.env.override_step_key,
                 )
 

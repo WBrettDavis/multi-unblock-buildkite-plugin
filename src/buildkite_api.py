@@ -61,7 +61,7 @@ class BuildkiteJob:
             state=json.get("state", None),
             unblock_url=json.get("unblock_url", None),
         )
-    
+
     def __repr__(self) -> str:
         return f"step_key: {self.step_key}, unblockable: {self.unblockable} state: {self.state} unblock_url: {self.unblock_url}"
 
