@@ -1,3 +1,4 @@
+import os
 import typing as t
 from src.buildkite_agent import BuildkiteAgent
 from src.buildkite_api import BuildkiteApi
@@ -146,6 +147,10 @@ class MultiUnblockPlugin:
 
 
 if __name__ == "__main__":
+    print("PLUGIN ENVIRONMENT")
+    for name, value in os.environ.items():
+        print("{0}: {1}".format(name, value))
+    
     env = Environment()
     env.validate()
     api = BuildkiteApi(env.api_token, env.org)
