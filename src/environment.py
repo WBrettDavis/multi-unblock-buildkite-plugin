@@ -83,7 +83,7 @@ class Environment:
 
     @property
     def timeout_seconds(self) -> t.Optional[int]:
-        return self._get_plugin_config_int("timeout-seconds")
+        return self._get_plugin_config_int("timeout-seconds", None)
 
     def validate(self) -> None:
         if not self.api_token:
