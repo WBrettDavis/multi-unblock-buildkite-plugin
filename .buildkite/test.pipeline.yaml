@@ -1,0 +1,48 @@
+steps:
+  - label: ":shell: Shell Linting"
+    plugins:
+      plugin-linter#v3.0.0:
+        id: affirm/multi-approval
+  
+  - label: ':python-black: Python Linting'
+    command: []
+    plugins:
+      - ecr#v2.7.0:
+          login: true
+          account-ids: "998571911837"
+      - docker#v5.10.0:
+          image: "998571911837.dkr.ecr.us-east-1.amazonaws.com/dockerhub/cytopia/black:latest"
+          command: ["--check", "src", "tests"]
+  
+  - label: ":pytest: Pytest (Python 3.7)"
+    command:
+      - "pip install -r requirements-dev.txt ;"
+      - "python -m pytest tests ;"
+    plugins:
+      - ecr#v2.7.0:
+          login: true
+          account-ids: "998571911837"
+      - docker#v5.10.0:
+          image: "998571911837.dkr.ecr.us-east-1.amazonaws.com/dockerhub/library/python:3.7-slim"
+  
+  - label: ":pytest: Pytest (Python 3.9)"
+    command:
+      - "pip install -r requirements-dev.txt ;"
+      - "python -m pytest tests ;"
+    plugins:
+      - ecr#v2.7.0:
+          login: true
+          account-ids: "998571911837"
+      - docker#v5.10.0:
+          image: "998571911837.dkr.ecr.us-east-1.amazonaws.com/dockerhub/library/python:3.9-slim"
+  
+  - label: ":pytest: Pytest (Python 3.11)"
+    command:
+      - "pip install -r requirements-dev.txt ;"
+      - "python -m pytest tests ;"
+    plugins:
+      - ecr#v2.7.0:
+          login: true
+          account-ids: "998571911837"
+      - docker#v5.10.0:
+          image: "998571911837.dkr.ecr.us-east-1.amazonaws.com/dockerhub/library/python:3.11-slim"
