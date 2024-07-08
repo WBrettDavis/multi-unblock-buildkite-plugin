@@ -1,5 +1,6 @@
 import time
 import fnmatch
+import logging
 from multiprocessing import Process, Queue
 
 import typing as t
@@ -8,6 +9,8 @@ from src.buildkite_agent import BuildkiteAgent
 from src.buildkite_api import BuildkiteApi
 from src.environment import Environment
 
+logging.basicConfig()
+logger = logging.getLogger(__name__) 
 
 APPROVAL_VALIDATION_FAILED_EXIT_CODE = 99
 FAILED_EMOJI = ":negative_squared_cross_mark:"
@@ -36,11 +39,11 @@ class MultiUnblockPlugin:
         poll_interval_seconds = 10
         while True:
             step_state = self.agent.get_step_state(step_key)
-            print(f"Override step state: {step_state}")
+            logger.info(f"Override step state: {step_state}")
             if step_state in ["unblocked", "finished"]:
                 result_queue.put(OVERRIDE_EVENT)
                 break
-            print(
+            logger.info(
                 f"Override step is still blocked, checking again in {poll_interval_seconds} seconds"
             )
             time.sleep(float(poll_interval_seconds))
@@ -52,7 +55,7 @@ class MultiUnblockPlugin:
     def _monitor_thread(self, override_step_key: str, result_queue: Queue) -> None:
         poll_interval_seconds = 10
         while True:
-            print("Checking for unblockable jobs")
+            logger.info("Checking for unblockable jobs")
             unblockable_jobs = self.api.get_unblockable_jobs_in_build(
                 self.env.pipeline_slug, self.env.build_number
             )
@@ -61,10 +64,10 @@ class MultiUnblockPlugin:
             ]
 
             if not jobs_minus_override:
-                print("No remaining unblockable jobs. Exiting...")
+                logger.info("No remaining unblockable jobs. Exiting...")
                 result_queue.put(NO_JOBS_REMAINING_EVENT)
                 break
-            print(
+            logger.info(
                 f"Found {len(jobs_minus_override)} unblockable jobs: {', '.join([j.step_key for j in jobs_minus_override])}"
             )
             time.sleep(float(poll_interval_seconds))
@@ -89,8 +92,8 @@ class MultiUnblockPlugin:
                     [j.step_key for j in unblockable_jobs], block_step_pattern
                 )
             )
-            print(f"Step Keys Matching Pattern: {block_step_pattern}")
-            print(f"Key: {' '.join(pattern_matched_step_keys)}")
+            logger.debug(f"Step Keys Matching Pattern: {block_step_pattern}")
+            logger.debug(f"Key: {' '.join(pattern_matched_step_keys)}")
             step_keys_to_unblock.update(pattern_matched_step_keys)
 
         unblock_processes: t.List[Process] = []
@@ -98,7 +101,7 @@ class MultiUnblockPlugin:
             j for j in unblockable_jobs if j.step_key in step_keys_to_unblock
         ]
         job_keys_to_unblock = [j.step_key for j in jobs_to_unblock]
-        print(f"Unblocking the following jobs: {', '.join(job_keys_to_unblock)}")
+        logger.info(f"Unblocking the following jobs: {', '.join(job_keys_to_unblock)}")
         for job in jobs_to_unblock:
             unblock_process = Process(target=self.api.unblock_job, args=[job])
             unblock_processes.append(unblock_process)
@@ -138,7 +141,7 @@ class MultiUnblockPlugin:
         processes.append(poll_override_state_process)
 
         if timeout_seconds == -1:
-            print("Starting build monitor")
+            logger.info("Starting build monitor")
             monitor_process = Process(
                 target=self._monitor_thread,
                 args=[override_step_key, result_queue],
@@ -146,7 +149,7 @@ class MultiUnblockPlugin:
             monitor_process.start()
             processes.append(monitor_process)
         else:
-            print("Starting timeout clock")
+            logger.info("Starting timeout clock")
             timeout_process = Process(
                 target=self._sleep_thread, args=[timeout_seconds, result_queue]
             )
@@ -155,7 +158,7 @@ class MultiUnblockPlugin:
 
         result = result_queue.get()
 
-        print(f"Unblocking. Reason: {result}")
+        logger.info(f"Unblocking. Reason: {result}")
 
         for process in processes:
             process.terminate()
@@ -164,7 +167,7 @@ class MultiUnblockPlugin:
     def main(self) -> None:
         if self.env.timeout_seconds is None:
             # No timer aspect, so immediately unblock
-            print("Immediately unblocking")
+            logger.info("Immediately unblocking")
             self.unblock_jobs(self.env.block_steps, self.env.block_step_pattern)
         else:
             self_step_label = self.agent.get_self_step_label()
@@ -176,14 +179,14 @@ class MultiUnblockPlugin:
 
             if self.env.override_step_key is None:
                 # Timer, but no override - sleep and then unblock everything
-                print("Unblocking after timer expires")
+                logger.info("Unblocking after timer expires")
                 self.timed_unblock_jobs(
                     self.env.timeout_seconds,
                     self.env.block_steps,
                     self.env.block_step_pattern,
                 )
             else:
-                print("Unblocking after timer expires (with override)")
+                logger.info("Unblocking after timer expires (with override)")
                 self.timed_unblock_jobs_with_override(
                     self.env.timeout_seconds,
                     self.env.override_step_key,

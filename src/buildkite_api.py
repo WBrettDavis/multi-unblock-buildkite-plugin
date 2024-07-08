@@ -1,9 +1,12 @@
 import json
+import logging
 import urllib.parse
 import urllib.request
 import urllib.error
 import typing as t
 
+logging.basicConfig()
+logger = logging.getLogger(__name__) 
 
 class BuildkiteUser:
     def __init__(self, id, name: str, email: str) -> None:
@@ -107,6 +110,7 @@ class BuildkiteApi:
         )
         url = f"{BUILDKITE_API_URL}/{builds_api}"
         status_code, res_headers, build_json = self._http_get(url)
+        logger.debug(f"(BK API) get_unblockable_jobs_in_build Response: ({status_code}, {res_headers}, {build_json})")
         build = BuildkiteBuild.from_json(build_json)
         unblockable_jobs = [j for j in build.jobs if j.unblockable]
         return unblockable_jobs
@@ -119,3 +123,4 @@ class BuildkiteApi:
         if not fields:
             fields = {}
         status_code, res_headers, data = self._http_put(job.unblock_url, data=fields)
+        logger.debug(f"(BK API) unblock_job Response: ({status_code}, {res_headers}, {data})")
